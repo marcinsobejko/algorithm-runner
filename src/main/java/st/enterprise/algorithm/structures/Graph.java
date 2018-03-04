@@ -1,21 +1,52 @@
 package st.enterprise.algorithm.structures;
 
-import java.util.LinkedList;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.Stack;
 
 /**
  * Created by Marcin on 18.02.2018.
  */
+@AllArgsConstructor
 public class Graph {
 
+    private Node root;
 
+    public Node findNode(String name) {
+        Stack<Node> nodesToRemember = new Stack<>();
+        nodesToRemember.push(root);
 
-    private static class Node<E> {
-        E item;
-        Node<E>[] nexts;
+        while(!nodesToRemember.isEmpty()) {
+            Node currentNode = nodesToRemember.pop();
 
-        Node(E element, Node<E>... nexts) {
-            this.item = element;
-            this.nexts = nexts;
+            if(currentNode.getName().equals(name)) {
+                return currentNode;
+            } else {
+                Optional.ofNullable(currentNode.getLeft()).ifPresent(n -> {
+                    nodesToRemember.push(n);
+                });
+
+                Optional.ofNullable(currentNode.getRight()).ifPresent(n -> {
+                    nodesToRemember.push(n);
+                });
+            }
         }
+
+        return null;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class Node {
+
+        private String name;
+
+        private Method method;
+
+        private Node left;
+        private Node right;
     }
 }
