@@ -25,13 +25,8 @@ public class Graph {
             if(currentNode.getName().equals(name)) {
                 return currentNode;
             } else {
-                Optional.ofNullable(currentNode.getLeft()).ifPresent(n -> {
-                    nodesToRemember.push(n);
-                });
-
-                Optional.ofNullable(currentNode.getRight()).ifPresent(n -> {
-                    nodesToRemember.push(n);
-                });
+                Optional.ofNullable(currentNode.getLeft()).ifPresent(nodesToRemember::push);
+                Optional.ofNullable(currentNode.getRight()).ifPresent(nodesToRemember::push);
             }
         }
 
