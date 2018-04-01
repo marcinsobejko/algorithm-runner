@@ -15,9 +15,6 @@ import java.util.List;
  */
 public class SumAllElementsInCollection extends Algorithm<List<Integer>, Integer> {
 
-    protected List<Integer> integers;
-
-    protected Integer sum;
     protected int index;
 
     public SumAllElementsInCollection() {
@@ -25,24 +22,22 @@ public class SumAllElementsInCollection extends Algorithm<List<Integer>, Integer
     }
 
     @Start(nextBlock = "fn1")
-    protected void start(List<Integer> integers) {
-        this.integers = integers;
-        this.sum = 0;
-        this.index = 0;
+    protected void start() {
+        outputModel = 0;
+        index = 0;
     }
 
     @Function(name = "fn1", nextBlock = "con1")
-    protected void fn1(List<Integer> integers) {
-        sum += integers.get(index);
+    protected void fn1() {
+        outputModel += inputModel.get(index);
+        index++;
     }
 
     @Condition(name = "con1", nextBlockOnFalse = "fn1", nextBlockOnTrue = "end")
-    protected boolean con1() {
-        return integers.size() > index;
-    }
+    protected boolean con1() { return inputModel.size() > index; }
 
     @End
     protected Integer end() {
-        return sum;
+        return outputModel;
     }
 }
