@@ -6,8 +6,10 @@ import st.enterprise.algorithm.annotations.Function;
 import st.enterprise.algorithm.annotations.Start;
 import st.enterprise.algorithm.structures.Graph;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Every algorithm need to extends from this class.
@@ -54,6 +56,7 @@ public abstract class Algorithm<InputModel, OutputModel> {
             boolean isFunction = method.getAnnotation(Function.class) != null;
 
             if(isStart || isEnd || isCondition || isFunction) {
+                method.setAccessible(true);
                 methods.add(method);
             }
         }
@@ -168,7 +171,39 @@ public abstract class Algorithm<InputModel, OutputModel> {
      * Process algorithm based on graph.
      */
     protected void process() {
-        renderGraph(graph);
+        Graph.Node node = graph.getRoot();
+
+        while(true) {
+            if(Utils.haveStartAnnotation(node.getMethod()) || Utils.haveFunctionAnnotation(node.getMethod())) {
+                try {
+                    node.getMethod().invoke(this, null);
+                    node = node.getLeft();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            } else if(Utils.haveConditionAnnotation(node.getMethod()))  {
+                Boolean isLeft = null;
+                try {
+                    isLeft = (Boolean) node.getMethod().invoke(this, null);
+                    node = isLeft ? node.getLeft() : node.getRight();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            } else if(Utils.haveEndAnnotation(node.getMethod())) {
+                try {
+                    node.getMethod().invoke(this, null);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
     }
 
     private void renderGraph(Graph graph) {
@@ -215,4 +250,23 @@ public abstract class Algorithm<InputModel, OutputModel> {
         process();
         return outputModel;
     };
+
+     private static class Utils {
+
+         public static boolean haveStartAnnotation(Method method) {
+            return method.getAnnotation(Start.class) != null;
+        }
+
+        public static boolean haveEndAnnotation(Method method) {
+            return method.getAnnotation(End.class) != null;
+        }
+
+        public static boolean haveFunctionAnnotation(Method method) {
+            return method.getAnnotation(Function.class) != null;
+        }
+
+        public static boolean haveConditionAnnotation(Method method) {
+            return method.getAnnotation(Condition.class) != null;
+        }
+    }
 }
